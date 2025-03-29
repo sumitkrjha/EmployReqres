@@ -1,124 +1,184 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { deleteUser, fetchUsers, setPage } from "../redux/userSlice";
+import toast from "react-hot-toast";
 
 const UserList = () => {
-  const baseURL = import.meta.env.VITE_APP_BASE_URL;
-  const [userData, setUserData] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const baseURL = import.meta.env.VITE_APP_BASE_URL;
+  const { data, page, perPage, loading, hasFetched } = useSelector(
+    (state) => state.users
+  );
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const token = localStorage.token;
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (token) {
-      loadData();
-    } else {
+    if (!token) {
       navigate("/login");
+    } else if (!hasFetched) {
+      dispatch(fetchUsers());
     }
-  }, [token]);
-
-  const loadData = async () => {
-    try {
-      const result = await fetch(`${baseURL}/api/users?page=1`);
-      const data = await result.json();
-      console.log(data);
-      if (data) {
-        setUserData(data.data);
-      } else {
-        console.error("No Data");
-      }
-    } catch (error) {
-      console.log("Error while fetching data: ", error);
-    }
-  };
+  }, [dispatch, token, hasFetched]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("users");
+    toast.success("Logout successfull!");
     navigate("/login");
   };
 
+  // Filter users based on search input
+  const filteredUsers = data.filter((user) =>
+    `${user.first_name} ${user.last_name}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // Reset pagination when search query changes
+  useEffect(() => {
+    dispatch(setPage(1));
+  }, [searchQuery, dispatch]);
+
+  const handleDelete = async (id) => {
+    toast.success("started deleting");
+    try {
+      const response = await fetch(`${baseURL}/api/users/${id}`, {
+        method: "DELETE",
+      });
+
+      console.log(response.status);
+      if (response.status === 204) {
+        dispatch(deleteUser(id));
+        toast.success("Deleted Successfully!");
+      } else {
+        toast.error("Deletion not possible");
+      }
+    } catch (err) {
+      toast.error(`Error while deleting: ${err.message}`);
+    }
+  };
+
+  // Recalculate total pages based on filtered results
+  const totalPages = Math.ceil(filteredUsers.length / perPage);
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * perPage,
+    page * perPage
+  );
+
   return (
-    <>
-      <div id="container" className="h-auto w-full px-16 py-6">
+    <div id="container" className="h-auto w-full md:px-16 py-6">
+      <div
+        id="header"
+        className="w-full rounded-xl p-2 gap-4 md:gap-0 flex flex-col md:flex-row items-center justify-between"
+      >
+        <h1 id="title" className="text-3xl font-mono">
+          Employ.Reqres
+        </h1>
         <div
-          id="header"
-          className="w-full  rounded-xl p-2 flex items-center justify-between"
+          id="buttons"
+          className="w-auto p-2 flex items-center justify-between gap-3"
         >
-          <h1 id="title" className="text-3xl font-mono">
-            Employ.Reqres
-          </h1>
-          <div
-            id="buttons"
-            className="w-auto p-2 flex items-center justify-between gap-3"
-          >
-            <a
-              href="https://github.com/sumitkrjha/EmployReqres"
-              target="_blank"
-            >
-              <button className="w-28 bg-gray-700 p-2 rounded-xl font-semibold text-white hover:bg-gray-800">
-                GitHub
-              </button>
-            </a>
-            <button
-              className="w-28 bg-red-500 p-2 rounded-xl font-semibold text-white hover:bg-red-700"
-              onClick={handleLogout}
-            >
-              Logout
+          <a href="https://github.com/sumitkrjha/EmployReqres" target="_blank">
+            <button className="w-28 bg-gray-700 p-2 rounded-xl font-semibold text-white hover:bg-gray-800">
+              GitHub
             </button>
-          </div>
-        </div>
-        <div id="userContainer" className="w-full h-screen p-5 ">
-          <input
-            type="text"
-            placeholder="Search by username.."
-            className="w-72 h-12 p-2 border-2 border-black placeholder:text-md placeholder:text-black rounded-full"
-          />
-          <button className="ml-2 bg-red-500 p-2 rounded-full text-white w-32 h-12 hover:bg-red-700">
-            Clear Filters
-          </button>
-          <div
-            id="cardContainer"
-            className="mt-2 w-full grid md:grid-cols-3 grid-cols-1 place-items-center"
+          </a>
+          <button
+            className="w-28 bg-red-500 p-2 rounded-xl font-semibold text-white hover:bg-red-700"
+            onClick={handleLogout}
           >
-            {userData.length > 0 ? (
-              userData.map((user, index) => {
-                return (
-                  <div
-                    key={index}
-                    className=" border-2 border-gray-600 h-auto w-72 rounded-3xl p-5 m-3 flex flex-col items-center justify-center gap-2"
-                  >
-                    <img src={user.avatar} alt="" />
-                    <h1>
-                      {user.first_name} {user.last_name}
-                    </h1>
-                    <h3>{user.email}</h3>
-                    <button className="w-20 p-2 bg-gray-500 rounded-lg font-semibold hover:bg-gray-600 ">
-                      Edit
-                    </button>
-                    <button className="w-20 p-2 bg-red-500 rounded-lg font-semibold text-white hover:bg-red-700 ">
-                      Delete
-                    </button>
-                  </div>
-                );
-              })
-            ) : (
-              <span>Loading...</span>
-            )}
-          </div>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div id="userContainer" className="w-full h-fit p-5">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search by username.."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-72 h-12 p-2 border-2 border-black placeholder:text-md placeholder:text-black rounded-full"
+        />
+        {/* Clear Search Button */}
+        <button
+          className="mt-2 md:mt-0 ml-2 bg-red-500 p-2 rounded-full text-white w-32 h-12 hover:bg-red-700"
+          onClick={() => setSearchQuery("")}
+        >
+          Clear Filters
+        </button>
+
+        {/* User Cards */}
+        <div
+          id="cardContainer"
+          className="mt-14 w-full grid md:grid-cols-3 grid-cols-1 place-items-center"
+        >
+          {loading ? (
+            <span>Loading...</span>
+          ) : paginatedUsers.length > 0 ? (
+            paginatedUsers.map((user) => (
+              <div
+                key={user.id}
+                className="border-2 border-gray-600 h-auto w-72 rounded-3xl p-5 m-3 flex flex-col items-center justify-center gap-2"
+              >
+                <img src={user.avatar} alt={user.first_name} />
+                <h1>
+                  {user.first_name} {user.last_name}
+                </h1>
+                <h3>{user.email}</h3>
+                <Link to={`/user/${user.id}`}>
+                  <button className="w-20 p-2 bg-gray-500 rounded-lg font-semibold hover:bg-gray-600">
+                    Edit
+                  </button>
+                </Link>
+                <button
+                  className="w-20 p-2 bg-red-500 rounded-lg font-semibold text-white hover:bg-red-700"
+                  onClick={() => handleDelete(user.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-xl text-gray-500 font-semibold mt-4">
+              No users found
+            </p>
+          )}
+        </div>
+
+        {/* Pagination Controls */}
+        {totalPages == 0 ? (
+          <></>
+        ) : (
           <div
             id="paginationContainer"
             className="mt-2 p-2 w-full flex items-center justify-center gap-4"
           >
-            <button className="w-20 bg-violet-700 p-2 rounded-3xl font-semibold text-white">
+            <button
+              className="w-20 bg-violet-700 p-2 rounded-3xl font-semibold text-white disabled:opacity-50"
+              onClick={() => dispatch(setPage(page - 1))}
+              disabled={page === 1}
+            >
               Prev
             </button>
-            <p>Page 1/2</p>
-            <button className="w-20 bg-violet-700 p-2 rounded-3xl font-semibold text-white">
+            <p>
+              Page {page}/{totalPages}
+            </p>
+            <button
+              className="w-20 bg-violet-700 p-2 rounded-3xl font-semibold text-white disabled:opacity-50"
+              onClick={() => dispatch(setPage(page + 1))}
+              disabled={page === totalPages}
+            >
               Next
             </button>
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

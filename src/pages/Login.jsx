@@ -28,31 +28,29 @@ const Login = () => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`${baseURL}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      if (email === "eve.holt@reqres.in" && password === "cityslicka") {
+        const response = await fetch(`${baseURL}/api/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
+          setIsLoading(false);
+          toast.error("Invalid credentials");
+        }
+
+        setIsLoading(false);
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        toast.success("Login Successful!");
+        navigate("/");
+      } else {
         setIsLoading(false);
         toast.error("Invalid credentials");
       }
-
-      setIsLoading(false);
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      toast.success("Login Successful!");
-
-      setTimeout(() => {
-        toast.success("Navigating to User Page");
-      }, 500);
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
     } catch (err) {
       setIsLoading(false);
       toast.error("Error with API endpoint");
@@ -86,6 +84,7 @@ const Login = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                   placeholder="name@company.com"
                 />
+                Use: eve.holt@reqres.in
               </div>
               <div>
                 <label
@@ -104,6 +103,7 @@ const Login = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                   placeholder="••••••••"
                 />
+                Use: cityslicka
               </div>
               <button
                 type="submit"
