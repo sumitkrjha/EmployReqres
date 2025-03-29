@@ -3,7 +3,6 @@ import Login from "./pages/Login";
 import UserList from "./pages/UserList";
 import { Toaster } from "react-hot-toast";
 import UserDetails from "./pages/UserDetails";
-import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -16,7 +15,6 @@ const App = () => {
         </Routes>
         <Toaster position="top-center" />
       </BrowserRouter>
-      <Footer />
     </>
   );
 };

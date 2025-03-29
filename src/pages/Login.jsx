@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import Footer from "../components/Footer";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +61,7 @@ const Login = () => {
   return (
     <section className="bg-gray-50 h-screen w-full flex flex-col items-center justify-center">
       <div className="w-full flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <div className="w-full bg-white border-2 border-gray-600 rounded-lg shadow sm:max-w-md xl:p-0">
+        <div className="mb-4 w-full bg-white border-2 border-gray-600 rounded-lg shadow sm:max-w-md xl:p-0">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold font-serif text-center text-gray-900 md:text-2xl">
               Sign In
@@ -114,6 +114,7 @@ const Login = () => {
             </form>
           </div>
         </div>
+        <Footer />
       </div>
     </section>
   );

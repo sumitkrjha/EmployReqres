@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../redux/userSlice";
 import toast from "react-hot-toast";
-
+import Footer from "../components/Footer";
 const UserDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ const UserDetails = () => {
         </button>
       </Link>
       <h1 className="text-3xl font-bold mb-4">Edit User</h1>
-      <div className="border border-black p-4 rounded-lg">
+      <div className="mb-2 border border-black p-4 rounded-lg">
         <p className="text-xl font-semibold text-center mb-2">
           {user.first_name} {user.last_name}
         </p>
@@ -117,6 +117,7 @@ const UserDetails = () => {
           {loading ? "Updating..." : "Update User"}
         </button>
       </div>
+      <Footer />
     </div>
   );
 };
