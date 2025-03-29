@@ -2,8 +2,6 @@
 
 Employ.Reqres is a web application built with Vite, React.js, and Tailwind CSS. It utilizes Redux for state management and React Hot Toast for displaying success and error messages. The app interacts with the Reqres API to perform CRUD operations on users.
 
-(image.png)
-
 ## Features
 
 - **User Listing**: Fetches and displays users from the Reqres API.

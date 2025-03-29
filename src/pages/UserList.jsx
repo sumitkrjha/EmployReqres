@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { deleteUser, fetchUsers, setPage } from "../redux/userSlice";
 import toast from "react-hot-toast";
+import Header from "../components/Header";
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -22,13 +23,6 @@ const UserList = () => {
       dispatch(fetchUsers());
     }
   }, [dispatch, token, hasFetched]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("users");
-    toast.success("Logout successfull!");
-    navigate("/login");
-  };
 
   // Filter users based on search input
   const filteredUsers = data.filter((user) =>
@@ -70,33 +64,9 @@ const UserList = () => {
 
   return (
     <div id="container" className="h-auto w-full md:px-16 py-6">
-      <div
-        id="header"
-        className="w-full rounded-xl p-2 gap-4 md:gap-0 flex flex-col md:flex-row items-center justify-between"
-      >
-        <h1 id="title" className="text-3xl font-mono">
-          Employ.Reqres
-        </h1>
-        <div
-          id="buttons"
-          className="w-auto p-2 flex items-center justify-between gap-3"
-        >
-          <a href="https://github.com/sumitkrjha/EmployReqres" target="_blank">
-            <button className="w-28 bg-gray-700 p-2 rounded-xl font-semibold text-white hover:bg-gray-800">
-              GitHub
-            </button>
-          </a>
-          <button
-            className="w-28 bg-red-500 p-2 rounded-xl font-semibold text-white hover:bg-red-700"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+      <Header />
 
       <div id="userContainer" className="w-full h-fit p-5">
-        {/* Search Input */}
         <input
           type="text"
           placeholder="Search by username.."
@@ -115,7 +85,7 @@ const UserList = () => {
         {/* User Cards */}
         <div
           id="cardContainer"
-          className="mt-14 w-full grid md:grid-cols-3 grid-cols-1 place-items-center"
+          className="mt-12 w-full grid md:grid-cols-3 grid-cols-1 place-items-center"
         >
           {loading ? (
             <span>Loading...</span>
